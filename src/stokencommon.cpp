@@ -44,7 +44,10 @@ StokenCommon::StokenCommon(QObject *parent) : QObject(parent)
   , m_pin("0000")
   , m_token_serial("")
   , m_expiration_date("")
+  , m_data_location("")
 {
+    m_data_location = QStandardPaths::locate(QStandardPaths::DataLocation, QString(), QStandardPaths::LocateDirectory);
+    qDebug() << "m_data_location: " << m_data_location;
     token_init();
 }
 
@@ -196,7 +199,11 @@ void StokenCommon::token_init()
 
 int StokenCommon::common_init()
 {
-    char* opt_rcfile = NULL;
+    char* opt_rcfile;
+    QString cfgLocation = QDir::cleanPath(m_data_location + QDir::separator() + "harbour-sftoken" + QDir::separator() + ".stokenrc");
+    qDebug() << "cfgLocation: " << cfgLocation;
+
+    opt_rcfile = strdup(cfgLocation.toLocal8Bit().constData());
 
     m_cfg = (stoken_cfg*) xzalloc(sizeof(*m_cfg));
     if (__stoken_read_rcfile(opt_rcfile, m_cfg, &warn) != ERR_NONE)
@@ -378,6 +385,15 @@ int StokenCommon::read_token_from_file(char *filename, struct securid_token *t)
 int StokenCommon::write_token_and_pin(char *token_str, char *pin_str, char *password)
 {
     char* opt_rcfile = NULL;
+    QString cfgLocation = QDir::cleanPath(m_data_location + QDir::separator() + "harbour-sftoken");
+    qDebug() << "cfgLocation: " << cfgLocation;
+    QDir cfgDir(cfgLocation);
+    if (!cfgDir.exists()) {
+        cfgDir.mkpath(".");
+    }
+    qDebug() << "cfgDir: " << cfgDir;
+    cfgLocation = QDir::cleanPath(cfgLocation + QDir::separator() + ".stokenrc");
+    opt_rcfile = strdup(cfgLocation.toLocal8Bit().constData());
 
     free(m_cfg->rc_ver);
     free(m_cfg->rc_token);

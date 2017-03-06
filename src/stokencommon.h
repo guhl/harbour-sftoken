@@ -47,6 +47,8 @@ extern "C" {
 #include <QObject>
 #include <QDateTime>
 #include <QUrl>
+#include <QStandardPaths>
+#include <QDir>
 #include <sstream>
 #include <string>
 
@@ -111,6 +113,7 @@ private:
     QString m_pin;
     QString m_token_serial;
     QString m_expiration_date;
+    QString m_data_location;
 
     char *xstrdup(const char *s);
     void xstrncpy(char *dest, const char *src, size_t n);
