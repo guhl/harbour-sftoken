@@ -64,7 +64,8 @@ DISTFILES += \
     icons/86x86/harbour-sftoken.png \
     qml/harbour-sftoken.png \
     qml/pages/AboutPage.qml \
-    qml/components/PinDialog.qml
+    qml/components/PinDialog.qml \
+    lib/libstoken_lib.so
 
 HEADERS += \
     src/stokencommon.h

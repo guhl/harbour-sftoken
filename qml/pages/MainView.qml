@@ -30,6 +30,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import org.nemomobile.notifications 1.0
 import "../components"
 
 Page {
@@ -75,6 +76,17 @@ Page {
         if (rc)
             stoken.token_init()
         pageStack.clear()
+    }
+
+    Notification {
+        id: notification
+    }
+
+    function notify(message) {
+        notification.previewBody = message;
+        notification.previewSummary = "SFToken";
+        notification.close();
+        notification.publish();
     }
 
     Timer {
@@ -179,6 +191,10 @@ Page {
                 anchors.horizontalCenter: parent.horizontalCenter
                 preferredWidth: Theme.buttonWidthLarge
                 text: qsTr("Copy")
+                onClicked: {
+                  Clipboard.text = label_token.text
+                  notify(qsTr("Token copied to clipboard"));
+                }
             }
             Grid {
                 id: grid
