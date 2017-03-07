@@ -42,29 +42,39 @@ Page {
     property double lastUpdated: 0
     property double tokenInterval: 60
     property bool pinEntered: false
+    property bool firstInit: true
 
     function refreshToken() {
+        if (firstInit && !stoken.initialized) {
+            stoken.token_init()
+            firstInit = false
+            if (stoken.initialized) {
+                pageStack.clear()
+                pageStack.push(Qt.resolvedUrl("MainView.qml"))
+            }
+        } else {
         var curDate = new Date();
         var seconds_global = curDate.getSeconds() % tokenInterval
-        if (stoken.initialized) {
-            if (!pinEntered) {
-                var dialog = pageStack.push(Qt.resolvedUrl("../components/PinDialog.qml"))
-                dialog.accepted.connect(function() {
-                                        stoken.pin = dialog.pin
-                                    })
-                pinEntered = true
+            if (stoken.initialized) {
+                if (!pinEntered) {
+                    var dialog = pageStack.push(Qt.resolvedUrl("../components/PinDialog.qml"))
+                    dialog.accepted.connect(function() {
+                                            stoken.pin = dialog.pin
+                                        })
+                    pinEntered = true
+                }
+                label_token.text = stoken.token_string
+                tokenInterval = stoken.token_interval
+                label_r2c1.text = stoken.next_token_string
+                if (stoken.token_uses_pin)
+                    label_r2c2.text = "Yes"
+                else
+                    label_r2c2.text = "No"
+                label_r4c1.text = stoken.token_serial
+                label_r4c2.text = stoken.expiration_date
+                // Update the Progressbar
+                updateProgress.value = tokenInterval - 1 - seconds_global
             }
-            label_token.text = stoken.token_string
-            tokenInterval = stoken.token_interval
-            label_r2c1.text = stoken.next_token_string
-            if (stoken.token_uses_pin)
-                label_r2c2.text = "Yes"
-            else
-                label_r2c2.text = "No"
-            label_r4c1.text = stoken.token_serial
-            label_r4c2.text = stoken.expiration_date
-            // Update the Progressbar
-            updateProgress.value = tokenInterval - 1 - seconds_global
         }
         // Set lastUpdate property
         lastUpdated = curDate.getTime();
@@ -149,8 +159,8 @@ Page {
         // of the page, followed by our content.
         Column {
             id: column_empty
-            visible: !stoken.initialized
-            width: parent.width
+            visible: (!stoken.initialized && !firstInit)
+            width: parent.width - 8
             spacing: Theme.paddingLarge
             PageHeader {
                 title: qsTr("Sailfish RSA Token")
@@ -173,8 +183,9 @@ Page {
 
         Column {
             id: column
-            visible: stoken.initialized
-            width: parent.width
+            visible: (stoken.initialized)
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width - 16
             spacing: Theme.paddingLarge
             PageHeader {
                 title: qsTr("Sailfish RSA Token")
